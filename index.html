@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebCrafter - Editor</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="static/colors.css">
+<link rel="stylesheet" href="static/style.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div id="topbar">
+  <a class="logo" href="#">
+    <div class="logo-icon"><i class="fas fa-magic"></i></div>
+    <span class="logo-text">WebCrafter</span>
+  </a>
+  <div class="topbar-sep"></div>
+  <button class="top-btn icon-only" id="btn-undo" title="Deshacer (Ctrl+Z)" disabled><i class="fas fa-undo"></i></button>
+  <button class="top-btn icon-only" id="btn-redo" title="Rehacer (Ctrl+Y)" disabled><i class="fas fa-redo"></i></button>
+  <div class="topbar-sep"></div>
+  <input class="project-name" type="text" value="Mi Proyecto Web" id="project-name">
+  <div class="topbar-sep"></div>
+  <div class="device-strip">
+    <button class="device-btn active" data-device="desktop" title="Escritorio 1100px"><i class="fas fa-desktop"></i></button>
+    <button class="device-btn" data-device="tablet" title="Tablet 768px"><i class="fas fa-tablet-alt"></i></button>
+    <button class="device-btn" data-device="mobile" title="Móvil 390px"><i class="fas fa-mobile-alt"></i></button>
+  </div>
+  <div class="topbar-right">
+    <button class="top-btn" id="btn-preview"><i class="fas fa-eye"></i> Vista Previa</button>
+    <button class="top-btn outline" id="btn-share"><i class="fas fa-share-nodes"></i> Compartir</button>
+    <button class="top-btn primary" id="btn-publish"><i class="fas fa-rocket"></i> Publicar</button>
+    <div class="topbar-sep"></div>
+    <a href="/login.html" class="top-btn login-btn"><i class="fas fa-user"></i> Iniciar sesión</a>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- LEFT SIDEBAR -->
+  <div id="sidebar">
+    <div class="s-nav">
+      <button class="s-nav-btn active" data-panel="elements"><i class="fas fa-shapes"></i>Elementos</button>
+      <button class="s-nav-btn" data-panel="templates"><i class="fas fa-layout"></i>Plantillas</button>
+      <button class="s-nav-btn" data-panel="layers"><i class="fas fa-layer-group"></i>Capas</button>
+    </div>
+    <div class="s-panel active" id="panel-elements">
+      <div class="s-search">
+        <i class="fas fa-search si"></i>
+        <input type="text" placeholder="Buscar elemento..." id="el-search">
+      </div>
+      <div id="elements-container"></div>
+    </div>
+    <div class="s-panel" id="panel-templates">
+      <div id="templates-container" style="padding:10px;display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+    <div class="s-panel" id="panel-layers">
+      <div class="layers-list" id="layers-list">
+        <p style="font-size:12px;color:var(--text-3);text-align:center;padding:20px;">Sin capas aún</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div id="canvas-area" onclick="handleBgClick(event)">
+    <div id="canvas-page" class="w-desktop"
+      ondragover="onDragOver(event)"
+      ondrop="onDrop(event)"
+      ondragleave="onDragLeave(event)">
+      <div id="canvas-empty">
+        <div class="empty-ring"><i class="fas fa-plus"></i></div>
+        <h3>Empieza a diseñar</h3>
+        <p>Arrastra elementos desde el panel izquierdo o haz clic en cualquier componente</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div id="panel">
+    <div class="panel-header">
+      <h3>Propiedades</h3>
+      <div class="sel-tag" id="panel-tag"></div>
+    </div>
+    <!-- Panel tabs -->
+    <div class="panel-tabs" id="panel-tabs" style="display:none;">
+      <button class="ptab active" data-tab="style"><i class="fas fa-paint-brush"></i> Estilo</button>
+      <button class="ptab" data-tab="content"><i class="fas fa-pen"></i> Contenido</button>
+    </div>
+    <div class="panel-body" id="panel-body">
+      <div class="panel-empty">
+        <div class="pei"><i class="fas fa-mouse-pointer"></i></div>
+        <p>Selecciona un elemento en el canvas para editar sus propiedades</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATUS BAR -->
+<div id="statusbar">
+  <div class="sb-dot"></div>
+  <span>WebCrafter</span>
+  <span id="sb-el" style="color:var(--text-2);font-weight:500;">0 elementos</span>
+  <span id="sb-dev">1100px · Escritorio</span>
+  <span style="margin-left:auto;font-size:10px;">Ctrl+Z deshacer · Supr eliminar · Ctrl+D duplicar</span>
+</div>
+
+<!-- IMAGE PICKER MODAL -->
+<div id="img-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:none;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:28px;width:520px;max-width:95vw;box-shadow:var(--shadow-xl);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+      <h3 style="font-size:16px;font-weight:700;">Cambiar imagen</h3>
+      <button onclick="closeImgModal()" style="border:none;background:transparent;cursor:pointer;font-size:18px;color:var(--text-3);">✕</button>
+    </div>
+    <div style="margin-bottom:12px;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">URL de imagen</label>
+      <div style="display:flex;gap:8px;">
+        <input id="img-url-input" type="text" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:var(--font);font-size:13px;outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        <button onclick="applyImgUrl()" style="padding:8px 16px;background:var(--accent);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Aplicar</button>
+      </div>
+    </div>
+    <div style="margin-bottom:8px;">
+      <label style="font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px;">Desde archivo</label>
+      <label style="display:block;border:2px dashed var(--border2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all 0.15s;" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border2)'">
+        <input type="file" accept="image/*" style="display:none;" onchange="handleImgFile(this)">
+        <i class="fas fa-upload" style="font-size:22px;color:var(--text-3);margin-bottom:8px;display:block;"></i>
+        <span style="font-size:13px;color:var(--text-3);">Haz clic o arrastra una imagen</span>
+      </label>
+    </div>
+    <div>
+      <label style="font-size:11px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px;">Imágenes de muestra</label>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;" id="stock-imgs"></div>
+    </div>
+  </div>
+</div>
+<!-- AÑADE ESTO AL FINAL DE TU index.html, DESPUÉS DEL MODAL DE IMAGEN -->
+
+<!-- FILE PICKER MODAL UNIFICADO -->
+<div id="file-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:20px;padding:28px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-xl);">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+      <h3 style="font-size:18px;font-weight:700;" id="file-modal-title">Seleccionar archivo</h3>
+      <button onclick="closeFileModal()" style="border:none;background:transparent;cursor:pointer;font-size:20px;color:var(--text-3);">✕</button>
+    </div>
+    
+    <!-- Pestañas: Subir / Biblioteca / URL -->
+    <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+      <button class="file-tab active" data-tab="upload" onclick="switchFileTab('upload')" style="padding:10px 16px;border:none;background:transparent;font-weight:600;color:var(--accent);border-bottom:2px solid var(--accent);cursor:pointer;">Subir archivo</button>
+      <button class="file-tab" data-tab="library" onclick="switchFileTab('library')" style="padding:10px 16px;border:none;background:transparent;font-weight:600;color:var(--text-3);cursor:pointer;">Biblioteca</button>
+      <button class="file-tab" data-tab="url" onclick="switchFileTab('url')" style="padding:10px 16px;border:none;background:transparent;font-weight:600;color:var(--text-3);cursor:pointer;">Desde URL</button>
+    </div>
+    
+    <!-- Panel: Subir archivo -->
+    <div id="file-tab-upload" class="file-tab-panel active">
+      <div style="border:2px dashed var(--border2);border-radius:12px;padding:32px;text-align:center;cursor:pointer;transition:all 0.15s;" 
+           onmouseenter="this.style.borderColor='var(--accent)'" 
+           onmouseleave="this.style.borderColor='var(--border2)'"
+           onclick="document.getElementById('file-input').click()">
+        <i class="fas fa-cloud-upload-alt" style="font-size:40px;color:var(--text-3);margin-bottom:12px;display:block;"></i>
+        <span style="font-size:14px;color:var(--text-2);font-weight:500;">Haz clic para seleccionar o arrastra un archivo</span>
+        <p style="font-size:12px;color:var(--text-3);margin-top:8px;" id="file-accepted-types">Formatos: JPG, PNG, GIF, MP4, WebM</p>
+        <input type="file" id="file-input" style="display:none;" accept="image/*,video/*" onchange="handleFileSelect(this)">
+      </div>
+      
+      <!-- Vista previa -->
+      <div id="file-preview-container" style="margin-top:20px;display:none;">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;">Vista previa:</div>
+        <div id="file-preview" style="border-radius:12px;overflow:hidden;border:1px solid var(--border);"></div>
+      </div>
+    </div>
+    
+    <!-- Panel: Biblioteca (archivos ya subidos) -->
+    <div id="file-tab-library" class="file-tab-panel" style="display:none;">
+      <div style="margin-bottom:12px;">
+        <input type="text" placeholder="Buscar en biblioteca..." style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;">
+      </div>
+      <div id="file-library-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-height:300px;overflow-y:auto;padding:4px;">
+        <!-- Se llenará dinámicamente -->
+        <div style="grid-column:span3;text-align:center;padding:20px;color:var(--text-3);">
+          <i class="fas fa-folder-open" style="font-size:24px;margin-bottom:8px;display:block;"></i>
+          No hay archivos en la biblioteca
+        </div>
+      </div>
+    </div>
+    
+    <!-- Panel: Desde URL -->
+    <div id="file-tab-url" class="file-tab-panel" style="display:none;">
+      <div style="margin-bottom:16px;">
+        <label style="font-size:12px;font-weight:600;color:var(--text-2);display:block;margin-bottom:6px;">URL del archivo</label>
+        <div style="display:flex;gap:8px;">
+          <input id="file-url-input" type="url" placeholder="https://ejemplo.com/video.mp4" style="flex:1;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;">
+          <button onclick="applyFileFromUrl()" style="padding:10px 20px;background:var(--accent);color:white;border:none;border-radius:8px;font-weight:600;">Aplicar</button>
+        </div>
+      </div>
+      <div style="background:var(--bg);border-radius:8px;padding:12px;">
+        <p style="font-size:12px;color:var(--text-3);">Ejemplos de URLs:</p>
+        <ul style="font-size:11px;color:var(--text-2);margin-left:20px;">
+          <li>https://ejemplo.com/video.mp4</li>
+          <li>https://ejemplo.com/imagen.jpg</li>
+          <li>https://ejemplo.com/imagen.png</li>
+        </ul>
+      </div>
+    </div>
+    
+    <!-- Botones de acción -->
+    <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px;">
+      <button onclick="closeFileModal()" style="padding:10px 16px;border:1.5px solid var(--border);background:white;border-radius:8px;cursor:pointer;">Cancelar</button>
+      <button onclick="applySelectedFile()" id="file-apply-btn" style="padding:10px 24px;background:var(--accent);color:white;border:none;border-radius:8px;font-weight:600;cursor:pointer;">Aplicar</button>
+    </div>
+  </div>
+</div>
+<div id="toasts"></div>
+<script src="static/script.js"></script>
+</body>
+</html>
