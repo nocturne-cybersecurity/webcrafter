@@ -84,7 +84,7 @@ function signInWithGoogle() {
       showToast(`¡Bienvenido ${result.user.displayName || ''}!`, 'green');
       // Redirigir al dashboard después de 1 segundo
       setTimeout(() => {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/index.html';
       }, 1000);
     })
     .catch(error => {
@@ -100,7 +100,7 @@ function signInWithMicrosoft() {
     .then(result => {
       showToast(`¡Bienvenido ${result.user.displayName || ''}!`, 'green');
       setTimeout(() => {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/index.html';
       }, 1000);
     })
     .catch(error => {
@@ -201,4 +201,5 @@ window.forgotPassword = forgotPassword;
 window.showRegister = showRegister;
 window.signInWithGoogle = signInWithGoogle;
 window.signInWithMicrosoft = signInWithMicrosoft;
+
 
