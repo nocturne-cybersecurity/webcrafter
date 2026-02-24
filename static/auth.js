@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Redirigir después de 1 segundo
         setTimeout(() => {
-          window.location.href = '/dashboard.html';
+          window.location.href = '/index.html';
         }, 1000);
         
       } catch (error) {
@@ -201,3 +201,4 @@ window.forgotPassword = forgotPassword;
 window.showRegister = showRegister;
 window.signInWithGoogle = signInWithGoogle;
 window.signInWithMicrosoft = signInWithMicrosoft;
+
